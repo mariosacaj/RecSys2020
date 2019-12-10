@@ -1,0 +1,62 @@
+
+# Visualize rows/columns stats
+import csv
+import numpy as np
+from scipy.sparse import coo_matrix
+
+
+def list_ID_stats(ID_list, label):
+    ID_list = list(map(int, ID_list))
+    list_length = len(ID_list)
+    min_val = min(ID_list)
+    max_val = max(ID_list)
+    unique_val = len(set(ID_list))
+    repetitions = list_length - unique_val
+    delta = max_val - min_val
+    missing_val = 0.
+    if delta is not 0:
+        missing_val = 1 - min(unique_val, delta)/delta
+
+    print("{} data, ID: min {}, max {}, length {}, unique {}, repetitions {}, missig {:.2f} %".format(label, min_val, max_val, list_length, unique_val, repetitions, missing_val*100))
+
+
+# This function loads CSV files to COOrdinate formatted sparse matrixes
+def toCoo(filepath, rowsDesc, columnsDesc):
+    rows = []
+    columns = []
+    data = []
+    with open(filepath) as csv_file:
+        csv_reader = csv.reader(csv_file)
+        line_count = 0
+        for row in csv_reader:
+            if line_count == 0:
+                line_count += 1
+            else:
+                rows.append(row[0])
+                columns.append(row[1])
+                data.append(row[2])
+                line_count += 1
+    print(filepath)
+    list_ID_stats(rows, rowsDesc)
+    list_ID_stats(columns, columnsDesc)
+    print(
+    )
+    data = np.array(data).astype(np.float)
+    rows = np.array(rows).astype(np.int)
+    columns = np.array(columns).astype(np.int)
+    return coo_matrix((data, (rows, columns)))
+
+# This function loads CSV files to NParrays
+def toNPArray(filepath):
+    users = []
+    with open(filepath) as csv_file:
+        csv_reader = csv.reader(csv_file)
+        line_count = 0
+        for row in csv_reader:
+            if line_count == 0:
+                line_count += 1
+            else:
+                users.append(row[0])
+                line_count += 1
+    users = np.array(users).astype(np.int)
+    return users
