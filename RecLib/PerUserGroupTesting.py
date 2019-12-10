@@ -1,5 +1,6 @@
 import scipy.sparse as sps
 import numpy as np
+from collections import defaultdict
 
 from Base.Evaluation.Evaluator import EvaluatorHoldout
 
@@ -26,17 +27,13 @@ def _topPop_rec(URM_train):
 def compare(URM_train, URM_test, recommenderList, cutoff = 10, rangeLimit = 20, enableTop = True, enablePureSVD = True):
     profile_length, block_size, sorted_users = prepare_user_base(URM_train)
 
-    MAPlist = [[]]
+    MAPlist = defaultdict(list)
 
     if enablePureSVD:
         recommenderList.append(_svd_rec(URM_train))
     if enableTop:
         recommenderList.append(_topPop_rec(URM_train))
 
-    MAP_itemKNN_per_group = []
-    MAP_slim_per_group = []
-    MAP_pureSVD_per_group = []
-    MAP_topPop_per_group = []
 
     for group_id in range(0, rangeLimit):
         start_pos = group_id * block_size
@@ -65,6 +62,8 @@ def compare(URM_train, URM_test, recommenderList, cutoff = 10, rangeLimit = 20, 
 
 
 def draw_charts(MAPlist, recommenderList):
+    from IPython import get_ipython
+    get_ipython().run_line_magic('matplotlib', 'inline')
     import matplotlib.pyplot as pyplot
 
     for idx, recommender in enumerate(recommenderList):
