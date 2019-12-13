@@ -37,7 +37,7 @@ class UserKNNCBFRecommender(BaseUserSimilarityMatrixRecommender):
             self.UCM_train = self.UCM_train.astype(np.float32)
             self.UCM_train = TF_IDF(self.UCM_train)
 
-        similarity = Compute_Similarity(self.UCM_train, shrink=shrink, topK=topK, normalize=normalize, similarity = similarity, **similarity_args)
+        similarity = Compute_Similarity(self.UCM_train.T, shrink=shrink, topK=topK, normalize=normalize, similarity = similarity, **similarity_args)
 
         self.W_sparse = similarity.compute_similarity()
         self.W_sparse = check_matrix(self.W_sparse, format='csr')
