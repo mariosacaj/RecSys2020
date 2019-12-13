@@ -99,3 +99,20 @@ def ICMbuilder(URM, SubclassesMatrix, PriceMatrix, AssetMatrix):
     ICM_all = np.concatenate((ICM_assets.todense(), ICM_prices.todense(), SubclassesMatrix.todense()), axis=1)
 
     return ICM_all
+
+
+# Building the UCM
+def UCMbuilder(URM, AgeMatrix, RegionMatrix):
+
+    n_users = URM.shape[0]
+
+    UCM_age = AgeMatrix
+    UCM_region = RegionMatrix
+    zeros = np.zeros(UCM_age.shape[1])
+    np.append(UCM_age, zeros, axis=0)
+
+    UCM = np.concatenate((UCM_age.todense(), UCM_region.todense()), axis=1)
+
+    return UCM
+
+
