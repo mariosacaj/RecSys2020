@@ -18,12 +18,12 @@ class ScoresRecommender(BaseSimilarityMatrixRecommender):
             self.RecList.append(rec)
         self.recLen = len(self.RecList)
 
-    def fit(self, alpha=0.5, *otherParam):
-        self.params.append(alpha)
+    def fit(self, *otherParam):
         for param in otherParam:
             self.params.append(param)
-
+        print(self.params)
         if self.recLen is not 2 and self.recLen is not len(self.params):
+            print((self.recLen, len(self.params)))
             raise Exception('ERROR: parameters insufficient or wrong in number')
         if self.recLen is 2:
             if len(self.params) is 1:
