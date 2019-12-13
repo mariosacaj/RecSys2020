@@ -14,9 +14,9 @@ class HybridRecommender(BaseRecommender):
         self.topPop = TopPop(URM_train)
         self.ItemHybrid = ScoresRecommender(URM_train, Recommender_1, Recommender_2, otherRecs)
 
-    def fit(self):
+    def fit(self, alpha=0.5, *otherParam):
         self.topPop.fit()
-        self.ItemHybrid.fit(shrink=50, topK=5)
+        self.ItemHybrid.fit(alpha, otherParam)
 
     """
 
