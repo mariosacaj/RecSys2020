@@ -1,7 +1,7 @@
 
 from Base.BaseRecommender import BaseRecommender
 from Base.NonPersonalizedRecommender import TopPop
-from KNN.ItemKNNCFRecommender import ItemKNNCFRecommender
+from .ScoresRecommender import ScoresRecommender
 import numpy as np
 
 
@@ -9,14 +9,14 @@ import numpy as np
 class HybridRecommender(BaseRecommender):
     RECOMMENDER_NAME = "HybridRecommender"
 
-    def __init__(self, URM_train):
+    def __init__(self, URM_train, Recommender_1, Recommender_2, *otherRecs):
         super(HybridRecommender, self).__init__(URM_train)
         self.topPop = TopPop(URM_train)
-        self.CF = ItemKNNCFRecommender(URM_train)
+        self.ItemHybrid = ScoresRecommender(URM_train, Recommender_1, Recommender_2, otherRecs)
 
     def fit(self):
         self.topPop.fit()
-        self.CF.fit(shrink=50, topK=5)
+        self.ItemHybrid.fit(shrink=50, topK=5)
 
     """
 
@@ -76,7 +76,7 @@ class HybridRecommender(BaseRecommender):
             if user in cold_users:
                 recommended_items, scores = self.topPop.recommend(user, cutoff, remove_seen_flag, items_to_compute, remove_top_pop_flag, remove_custom_items_flag, return_scores=True)
             else:
-                recommended_items, scores = self.CF.recommend(user, cutoff, remove_seen_flag, items_to_compute, remove_top_pop_flag, remove_custom_items_flag, return_scores=True)
+                recommended_items, scores = self.ItemHybrid.recommend(user, cutoff, remove_seen_flag, items_to_compute, remove_top_pop_flag, remove_custom_items_flag, return_scores=True)
             rankList.append(recommended_items)
             scoresList.append(scores)
 
