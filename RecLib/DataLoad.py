@@ -60,3 +60,42 @@ def toNPArray(filepath):
                 line_count += 1
     users = np.array(users).astype(np.int)
     return users
+
+# Building the ICM
+def ICMbuilder(URM, SubclassesMatrix, PriceMatrix, AssetMatrix):
+    from sklearn import preprocessing
+    le = preprocessing.LabelEncoder()
+
+    le.fit(AssetMatrix.data)
+    assetList_icm = le.transform(AssetMatrix.data)
+
+
+    le.fit(PriceMatrix.data)
+    priceList_icm = le.transform(PriceMatrix.data)
+    # print(priceList_icm)
+    # print(str(assetList_icm.min()) + ' ' + str(assetList_icm.max()) + ' ' + str(len(set(assetList_icm))) + ' ' + str(
+    #     len(assetList_icm)))
+    # print(str(priceList_icm.min()) + ' ' + str(priceList_icm.max()) + ' ' + str(len(set(priceList_icm))) + ' ' + str(
+    #     len(priceList_icm)))
+
+    n_items = URM.shape[1]
+    n_assets = len(set(assetList_icm))
+    ICMassets_shape = (n_items, n_assets)
+
+    ones = np.ones(len(assetList_icm))
+    ICM_assets = coo_matrix((ones, (AssetMatrix.row, assetList_icm)), shape=ICMassets_shape)
+    ICM_assets = ICM_assets.tocsr()
+
+    n_items = URM.shape[1]
+    n_prices = len(set(priceList_icm))
+    ICMprices_shape = (n_items, n_prices)
+
+    ones = np.ones(len(priceList_icm))
+    ICM_prices = coo_matrix((ones, (PriceMatrix.row, priceList_icm)), shape=ICMprices_shape)
+    ICM_prices = ICM_prices.tocsr()
+
+    # ICM_all=np.hstack((ICM_assets,ICM_prices))
+    # ICM_all=np.hstack((ICM_all,ICM_subclass))
+    ICM_all = np.concatenate((ICM_assets.todense(), ICM_prices.todense(), SubclassesMatrix.todense()), axis=1)
+
+    return ICM_all
