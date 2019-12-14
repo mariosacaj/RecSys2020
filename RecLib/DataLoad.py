@@ -72,11 +72,11 @@ def ICMbuilder(URM, SubclassesMatrix, PriceMatrix, AssetMatrix):
 
     le.fit(PriceMatrix.data)
     priceList_icm = le.transform(PriceMatrix.data)
-    # print(priceList_icm)
-    # print(str(assetList_icm.min()) + ' ' + str(assetList_icm.max()) + ' ' + str(len(set(assetList_icm))) + ' ' + str(
-    #     len(assetList_icm)))
-    # print(str(priceList_icm.min()) + ' ' + str(priceList_icm.max()) + ' ' + str(len(set(priceList_icm))) + ' ' + str(
-    #     len(priceList_icm)))
+    print(priceList_icm)
+    print(str(assetList_icm.min()) + ' ' + str(assetList_icm.max()) + ' ' + str(len(set(assetList_icm))) + ' ' + str(
+        len(assetList_icm)))
+    print(str(priceList_icm.min()) + ' ' + str(priceList_icm.max()) + ' ' + str(len(set(priceList_icm))) + ' ' + str(
+        len(priceList_icm)))
 
     n_items = URM.shape[1]
     n_assets = len(set(assetList_icm))
@@ -105,14 +105,16 @@ def ICMbuilder(URM, SubclassesMatrix, PriceMatrix, AssetMatrix):
 def UCMbuilder(URM, AgeMatrix, RegionMatrix):
 
     n_users = URM.shape[0]
-
     UCM_age = AgeMatrix
     UCM_region = RegionMatrix
-    zeros = np.zeros(UCM_age.shape[1])
-    np.append(UCM_age, zeros, axis=0)
-
+    # zeros = np.zeros(UCM_age.shape[1])
+    UCM_age.resize((n_users, UCM_age.shape[1]))
+    UCM_region.resize((n_users, UCM_region.shape[1]))
+    # np.append(UCM_age, zeros, axis=0)
+    # print(UCM_age.shape + ' ' + zeros.shape())
     UCM = np.concatenate((UCM_age.todense(), UCM_region.todense()), axis=1)
 
     return UCM
+
 
 
