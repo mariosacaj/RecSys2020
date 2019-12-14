@@ -7,7 +7,7 @@ class ScoresRecommender(BaseSimilarityMatrixRecommender):
 
     RECOMMENDER_NAME = "ScoresRecommender"
 
-    def __init__(self, URM_train, Recommender_1, Recommender_2, otherRecs):
+    def __init__(self, URM_train, Recommender_1, Recommender_2, *otherRecs):
         super(ScoresRecommender, self).__init__(URM_train)
         self.URM_train = Base.Recommender_utils.check_matrix(URM_train.copy(), 'csr')
         self.RecList = []
@@ -17,7 +17,7 @@ class ScoresRecommender(BaseSimilarityMatrixRecommender):
             self.RecList.append(rec)
         self.recLen = len(self.RecList)
 
-    def fit(self, otherParam):
+    def fit(self, *otherParam):
         self.alphaOnly = False
         self.params = []
         for param in otherParam:

@@ -3,7 +3,7 @@ from Base.BaseRecommender import BaseRecommender
 from Base.NonPersonalizedRecommender import TopPop
 from .ScoresRecommender import ScoresRecommender
 import numpy as np
-
+from KNN.UserKNNCBFRecommender import UserKNNCBFRecommender
 
 
 class HybridRecommender(BaseRecommender):
@@ -11,12 +11,22 @@ class HybridRecommender(BaseRecommender):
 
     def __init__(self, URM_train, Recommender_1, Recommender_2, *otherRecs):
         super(HybridRecommender, self).__init__(URM_train)
-        self.topPop = TopPop(URM_train)
-        self.ItemHybrid = ScoresRecommender(URM_train, Recommender_1, Recommender_2, otherRecs)
+        self.coldRecommender = TopPop(URM_train)
+        self.coldRecommender.fit()
+        self.coldBoosted = False
+        if isinstance(Recommender_1, UserKNNCBFRecommender):
+            self.coldRecommender = ScoresRecommender(URM_train, Recommender_1,  self.coldRecommender)
+            self.coldBoosted = True
+            self.warmRecommender = ScoresRecommender(URM_train, Recommender_2, *otherRecs)
+        else:
+            self.warmRecommender = ScoresRecommender(URM_train, Recommender_1, Recommender_2, *otherRecs)
 
     def fit(self, *otherParam):
-        self.topPop.fit()
-        self.ItemHybrid.fit(otherParam)
+        if self.coldBoosted:
+            self.coldRecommender.fit(otherParam[0])
+            self.warmRecommender.fit(*(otherParam[1:]))
+        else:
+            self.warmRecommender.fit(*otherParam)
 
     """
 
@@ -74,9 +84,9 @@ class HybridRecommender(BaseRecommender):
 
         for user in user_id_array:
             if user in cold_users:
-                recommended_items, scores = self.topPop.recommend(user, cutoff, remove_seen_flag, items_to_compute, remove_top_pop_flag, remove_custom_items_flag, return_scores=True)
+                recommended_items, scores = self.coldRecommender.recommend(user, cutoff, remove_seen_flag, items_to_compute, remove_top_pop_flag, remove_custom_items_flag, return_scores=True)
             else:
-                recommended_items, scores = self.ItemHybrid.recommend(user, cutoff, remove_seen_flag, items_to_compute, remove_top_pop_flag, remove_custom_items_flag, return_scores=True)
+                recommended_items, scores = self.warmRecommender.recommend(user, cutoff, remove_seen_flag, items_to_compute, remove_top_pop_flag, remove_custom_items_flag, return_scores=True)
             rankList.append(recommended_items)
             scoresList.append(scores)
 
