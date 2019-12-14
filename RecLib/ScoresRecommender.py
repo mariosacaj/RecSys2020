@@ -11,18 +11,17 @@ class ScoresRecommender(BaseSimilarityMatrixRecommender):
         super(ScoresRecommender, self).__init__(URM_train)
         self.URM_train = Base.Recommender_utils.check_matrix(URM_train.copy(), 'csr')
         self.RecList = []
-        self.params = []
         self.RecList.append(Recommender_1)
         self.RecList.append(Recommender_2)
         for rec in otherRecs:
             self.RecList.append(rec)
         self.recLen = len(self.RecList)
-        self.alphaOnly = False
 
     def fit(self, otherParam):
+        self.alphaOnly = False
+        self.params = []
         for param in otherParam:
             self.params.append(param)
-        print(self.params)
         if self.recLen is not 2 and self.recLen is not len(self.params):
             print((self.recLen, len(self.params)))
             raise Exception('ERROR: parameters insufficient or wrong in number')
