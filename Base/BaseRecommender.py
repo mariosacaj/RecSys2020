@@ -29,20 +29,21 @@ class BaseRecommender(object):
         self.filterTopPop = False
         self.filterTopPop_ItemsID = np.array([], dtype=np.int)
 
+
         self.items_to_ignore_flag = False
         self.items_to_ignore_ID = np.array([], dtype=np.int)
 
         self._cold_user_mask = np.ediff1d(self.URM_train.indptr) == 0
 
-        if self._cold_user_mask.any():
-            self._print("URM Detected {} ({:.2f} %) cold users.".format(
-                self._cold_user_mask.sum(), self._cold_user_mask.sum() / self.n_users * 100))
+        # if self._cold_user_mask.any():
+        #     self._print("URM Detected {} ({:.2f} %) cold users.".format(
+        #         self._cold_user_mask.sum(), self._cold_user_mask.sum() / self.n_users * 100))
 
         self._cold_item_mask = np.ediff1d(self.URM_train.tocsc().indptr) == 0
 
-        if self._cold_item_mask.any():
-            self._print("URM Detected {} ({:.2f} %) cold items.".format(
-                self._cold_item_mask.sum(), self._cold_item_mask.sum() / self.n_items * 100))
+        # if self._cold_item_mask.any():
+        #     self._print("URM Detected {} ({:.2f} %) cold items.".format(
+        #         self._cold_item_mask.sum(), self._cold_item_mask.sum() / self.n_items * 100))
 
     def _get_cold_user_mask(self):
         return self._cold_user_mask
@@ -56,6 +57,8 @@ class BaseRecommender(object):
 
     def fit(self):
         pass
+
+
 
     def get_URM_train(self):
         return self.URM_train.copy()
@@ -167,15 +170,6 @@ class BaseRecommender(object):
             user_recommendation_list = user_recommendation_list[not_inf_scores_mask]
             ranking_list[user_index] = user_recommendation_list.tolist()
 
-        # from Base.NonPersonalizedRecommender import TopPop
-        # if isinstance(self, TopPop):
-        #   pass
-        # else:
-        # topPop = TopPop(self.URM_train)
-        # topPop.fit()
-        # for user_index in range(len(user_id_array)):
-        #     if self.URM_train[user_index].sum() < 2:
-        #         ranking_list[user_index] = topPop.recommend(user_index, cutoff = cutoff)
 
         # Return single list for one user, instead of list of lists
         if single_user:
