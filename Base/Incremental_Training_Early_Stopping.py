@@ -232,8 +232,8 @@ class Incremental_Training_Early_Stopping(object):
 
             elapsed_time = time.time() - start_time
             new_time_value, new_time_unit = seconds_to_biggest_unit(elapsed_time)
-
-            print("{}: Epoch {} of {}. Elapsed time {:.2f} {}".format(
+            if float(epochs_current)/epochs_max in np.arange(0, 1.25, 0.25):
+                print("{}: Epoch {} of {}. Elapsed time {:.2f} {}".format(
                 algorithm_name, epochs_current+1, epochs_max, new_time_value, new_time_unit))
 
             epochs_current += 1

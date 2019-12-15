@@ -3,7 +3,24 @@
 import csv
 import numpy as np
 from scipy.sparse import coo_matrix
+import scipy.sparse as sps
 
+def dataLoad():
+    UCM_age = toCoo('Dataset/data_UCM_age.csv', 'user', 'age')
+    ICM_subclass = toCoo('Dataset/data_ICM_sub_class.csv', 'item', 'subclass')
+    ICM_asset = toCoo('Dataset/data_ICM_asset.csv', 'item', 'asset')
+    ICM_price = toCoo('Dataset/data_ICM_price.csv', 'item', 'price')
+    UCM_region = toCoo('Dataset/data_UCM_region.csv', 'user', 'region')
+    target_users = toNPArray('Dataset/data_target_users_test.csv')
+    URM = toCoo('Dataset/data_train.csv', 'user', 'item')
+    return UCM_age, ICM_subclass, ICM_asset, ICM_price, UCM_region, target_users, URM
+
+def contentMatrixLoad(URM_train, ICM_subclass, ICM_price, ICM_asset, UCM_age, UCM_region):
+    ICM = ICMbuilder(URM_train, ICM_subclass, ICM_price, ICM_asset)
+    ICM = sps.csr_matrix(ICM)
+    UCM = UCMbuilder(URM_train, UCM_age, UCM_region)
+    UCM = sps.csr_matrix(UCM)
+    return ICM, UCM
 
 def list_ID_stats(ID_list, label):
     ID_list = list(map(int, ID_list))
@@ -36,11 +53,11 @@ def toCoo(filepath, rowsDesc, columnsDesc):
                 columns.append(row[1])
                 data.append(row[2])
                 line_count += 1
-    print(filepath)
-    list_ID_stats(rows, rowsDesc)
-    list_ID_stats(columns, columnsDesc)
-    print(
-    )
+    # print(filepath)
+    # list_ID_stats(rows, rowsDesc)
+    # list_ID_stats(columns, columnsDesc)
+    # print(
+    # )
     data = np.array(data).astype(np.float)
     rows = np.array(rows).astype(np.int)
     columns = np.array(columns).astype(np.int)
@@ -72,11 +89,11 @@ def ICMbuilder(URM, SubclassesMatrix, PriceMatrix, AssetMatrix):
 
     le.fit(PriceMatrix.data)
     priceList_icm = le.transform(PriceMatrix.data)
-    print(priceList_icm)
-    print(str(assetList_icm.min()) + ' ' + str(assetList_icm.max()) + ' ' + str(len(set(assetList_icm))) + ' ' + str(
-        len(assetList_icm)))
-    print(str(priceList_icm.min()) + ' ' + str(priceList_icm.max()) + ' ' + str(len(set(priceList_icm))) + ' ' + str(
-        len(priceList_icm)))
+    # print(priceList_icm)
+    # print(str(assetList_icm.min()) + ' ' + str(assetList_icm.max()) + ' ' + str(len(set(assetList_icm))) + ' ' + str(
+    #     len(assetList_icm)))
+    # print(str(priceList_icm.min()) + ' ' + str(priceList_icm.max()) + ' ' + str(len(set(priceList_icm))) + ' ' + str(
+    #     len(priceList_icm)))
 
     n_items = URM.shape[1]
     n_assets = len(set(assetList_icm))
