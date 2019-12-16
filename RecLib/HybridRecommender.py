@@ -11,21 +11,18 @@ class HybridRecommender(BaseRecommender):
 
     def __init__(self, URM_train, Recommender_1, Recommender_2, *otherRecs):
         super(HybridRecommender, self).__init__(URM_train)
-        self.coldRecommender = TopPop(URM_train)
-        self.coldRecommender.fit()
-        self.coldBoosted = False
         if isinstance(Recommender_1, UserKNNCBFRecommender):
-            self.coldRecommender = ScoresRecommender(URM_train, Recommender_1,  self.coldRecommender)
-            self.coldBoosted = True
+            self.coldRecommender = Recommender_1
+            # self.coldRecommender = ScoresRecommender(URM_train, Recommender_1,  self.coldRecommender)
+            # self.coldBoosted = True
             self.warmRecommender = ScoresRecommender(URM_train, Recommender_2, *otherRecs)
         else:
             self.warmRecommender = ScoresRecommender(URM_train, Recommender_1, Recommender_2, *otherRecs)
+            self.coldRecommender = TopPop(URM_train)
+            self.coldRecommender.fit()
+            # self.coldBoosted = False
 
     def fit(self, *otherParam):
-        if self.coldBoosted:
-            self.coldRecommender.fit(otherParam[0])
-            self.warmRecommender.fit(*(otherParam[1:]))
-        else:
             self.warmRecommender.fit(*otherParam)
 
     """

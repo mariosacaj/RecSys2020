@@ -81,7 +81,7 @@ def evaluateAgainstUsers(rec_to_eval, itrMax, URM_train, URM_test, cutoff=10):
         if len(to_ignore) != URM_train.shape[0]:
             evalTest = EvaluatorHoldout(URM_test, cutoff_list=[cutoff], ignore_users=to_ignore)
             results, _ = evalTest.evaluateRecommender(rec_to_eval)
-            print('MAP at ' + str(itr) + ' interactions: ' + str(results[[cutoff]]["MAP"]))
+            print('MAP at ' + str(itr) + ' interactions: ' + str(results[cutoff]["MAP"]))
 
 def sortMap(MAP_LIST):
     from operator import itemgetter
