@@ -38,7 +38,7 @@ class SLIMElasticNetRecommender(BaseItemSimilarityMatrixRecommender):
         super(SLIMElasticNetRecommender, self).__init__(URM_train, verbose = verbose)
 
 
-    def fit(self, l1_ratio=0.1, alpha = 1.0, positive_only=True, topK = 100):
+    def fit(self, l1_ratio=0.1, alpha = 1.0, positive_only=True, topK = 100, warm_start = True, tol = 1e-4, max_iter=1000):
 
         assert l1_ratio>= 0 and l1_ratio<=1, "{}: l1_ratio must be between 0 and 1, provided value was {}".format(self.RECOMMENDER_NAME, l1_ratio)
 
@@ -57,8 +57,9 @@ class SLIMElasticNetRecommender(BaseItemSimilarityMatrixRecommender):
                                 copy_X=False,
                                 precompute=True,
                                 selection='random',
-                                max_iter=100,
-                                tol=1e-4)
+                                max_iter=max_iter,
+                                tol=tol,
+                                warm_start = warm_start)
 
         URM_train = check_matrix(self.URM_train, 'csc', dtype=np.float32)
 
