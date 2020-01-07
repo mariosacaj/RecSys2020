@@ -38,7 +38,7 @@ class SLIMElasticNetRecommender(BaseItemSimilarityMatrixRecommender):
         super(SLIMElasticNetRecommender, self).__init__(URM_train, verbose = verbose)
 
 
-    def fit(self, l1_ratio=0.1, alpha = 1.0, positive_only=True, topK = 100, warm_start = True, tol = 1e-4, max_iter=1000):
+    def fit(self, l1_ratio=0.1, alpha = 1.0, positive_only=True, topK = 100, warm_start = True, tol = 1e-4, max_iter=100):
 
         assert l1_ratio>= 0 and l1_ratio<=1, "{}: l1_ratio must be between 0 and 1, provided value was {}".format(self.RECOMMENDER_NAME, l1_ratio)
 
@@ -47,7 +47,7 @@ class SLIMElasticNetRecommender(BaseItemSimilarityMatrixRecommender):
         self.topK = topK
 
         # Display ConvergenceWarning only once and not for every item it occurs
-        warnings.simplefilter("once", category = ConvergenceWarning)
+        warnings.simplefilter("ignore", category = ConvergenceWarning)
 
         # initialize the ElasticNet model
         self.model = ElasticNet(alpha=alpha,
