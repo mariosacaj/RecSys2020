@@ -15,8 +15,8 @@ def dataLoad():
     URM = toCoo('Dataset/data_train.csv', 'user', 'item')
     return UCM_age, ICM_subclass, ICM_asset, ICM_price, UCM_region, target_users, URM
 
-def contentMatrixLoad(URM_train, ICM_subclass, ICM_price, ICM_asset, UCM_age, UCM_region, ones=True):
-    ICM = ICMbuilder(URM_train, ICM_subclass, ICM_price, ICM_asset, ones)
+def contentMatrixLoad(URM_train, ICM_subclass, ICM_price, ICM_asset, UCM_age, UCM_region, bins=True, no_price=False):
+    ICM = ICMbuilder(URM_train, ICM_subclass, ICM_price, ICM_asset, bins, no_price)
     ICM = sps.csr_matrix(ICM)
     UCM = UCMbuilder(URM_train, UCM_age, UCM_region)
     UCM = sps.csr_matrix(UCM)
@@ -90,32 +90,19 @@ def toNPArray(filepath):
     return users
 
 # Building the ICM
-def ICMbuilder(URM, SubclassesMatrix, PriceMatrix, AssetMatrix, ones):
+def ICMbuilder(URM, SubclassesMatrix, PriceMatrix, AssetMatrix, bins, no_price ):
     from sklearn import preprocessing
-    if ones:
-        le = preprocessing.LabelEncoder()
+    le = preprocessing.LabelEncoder()
+    le.fit(AssetMatrix.data)
+    assetList_icm = le.transform(AssetMatrix.data)
+    n_items = URM.shape[1]
+    ones = np.ones(len(assetList_icm))
+    ICM_assets = coo_matrix((ones, (AssetMatrix.row, assetList_icm)), shape=(n_items, len(set(assetList_icm))))
+    ICM_assets = ICM_assets.tocsr()
 
-        le.fit(AssetMatrix.data)
-        assetList_icm = le.transform(AssetMatrix.data)
-
-
+    if bins < 2:
         le.fit(PriceMatrix.data)
         priceList_icm = le.transform(PriceMatrix.data)
-        # print(priceList_icm)
-        # print(str(assetList_icm.min()) + ' ' + str(assetList_icm.max()) + ' ' + str(len(set(assetList_icm))) + ' ' + str(
-        #     len(assetList_icm)))
-        # print(str(priceList_icm.min()) + ' ' + str(priceList_icm.max()) + ' ' + str(len(set(priceList_icm))) + ' ' + str(
-        #     len(priceList_icm)))
-
-        n_items = URM.shape[1]
-        n_assets = len(set(assetList_icm))
-        ICMassets_shape = (n_items, n_assets)
-
-        ones = np.ones(len(assetList_icm))
-        ICM_assets = coo_matrix((ones, (AssetMatrix.row, assetList_icm)), shape=ICMassets_shape)
-        ICM_assets = ICM_assets.tocsr()
-
-        n_items = URM.shape[1]
         n_prices = len(set(priceList_icm))
         ICMprices_shape = (n_items, n_prices)
 
@@ -125,26 +112,20 @@ def ICMbuilder(URM, SubclassesMatrix, PriceMatrix, AssetMatrix, ones):
 
         # ICM_all=np.hstack((ICM_assets,ICM_prices))
         # ICM_all=np.hstack((ICM_all,ICM_subclass))
-        ICM_all = np.concatenate((ICM_assets.todense(), ICM_prices.todense(), SubclassesMatrix.todense()), axis=1)
     else:
-
-        le = preprocessing.KBinsDiscretizer(n_bins=20, encode='ordinal', strategy='kmeans')
-        X = np.reshape(AssetMatrix.data, (-1, 1))
-        le.fit_transform(X)
-        classList = le.transform(X)
-        ones = np.ones(len(classList))
-        ICM_assets = coo_matrix((ones, (AssetMatrix.row, classList.reshape(-1,))), shape=(URM.shape[1], 20))
-        ICM_assets = ICM_assets.tocsr()
-
-        le = preprocessing.KBinsDiscretizer(n_bins=19, encode='ordinal', strategy='kmeans')
+        le = preprocessing.KBinsDiscretizer(n_bins=bins, encode='ordinal', strategy='kmeans')
         # PRICE_9_BINS
         X = np.reshape(PriceMatrix.data, (-1, 1))
         le.fit_transform(X)
         classList = le.transform(X)
         ones = np.ones(len(classList))
-        ICM_prices = coo_matrix((ones, (PriceMatrix.row, classList.reshape(-1,))), shape=(URM.shape[1], 19))
+        ICM_prices = coo_matrix((ones, (PriceMatrix.row, classList.reshape(-1,))), shape=(URM.shape[1], bins))
         ICM_prices = ICM_prices.tocsr()
 
+    #
+    if no_price:
+        ICM_all = np.concatenate((ICM_assets.todense(), SubclassesMatrix.todense()), axis=1)
+    else:
         ICM_all = np.concatenate((ICM_assets.todense(), ICM_prices.todense(), SubclassesMatrix.todense()), axis=1)
 
     return ICM_all
