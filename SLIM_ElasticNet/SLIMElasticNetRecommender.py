@@ -163,16 +163,17 @@ class MultiThreadSLIM_ElasticNet(SLIMElasticNetRecommender, BaseItemSimilarityMa
         super(MultiThreadSLIM_ElasticNet, self).__init__(URM_train, verbose = verbose)
 
 
-    def _partial_fit(self, currentItem, X, topK):
-        model = ElasticNet(alpha=1.0,
+    def _partial_fit(self, currentItem, X, alpha = 1.0, topK = 100, warm_start = True, tol = 1e-4, max_iter=100):
+        model = ElasticNet(alpha=alpha,
                                 l1_ratio=self.l1_ratio,
                                 positive=self.positive_only,
                                 fit_intercept=False,
                                 copy_X=False,
                                 precompute=True,
                                 selection='random',
-                                max_iter=100,
-                                tol=1e-4)
+                                max_iter=max_iter,
+                                tol=tol,
+                                warm_start = warm_start)
 
         # WARNING: make a copy of X to avoid race conditions on column j
         # TODO: We can probably come up with something better here.
@@ -200,9 +201,7 @@ class MultiThreadSLIM_ElasticNet(SLIMElasticNetRecommender, BaseItemSimilarityMa
 
         return values, rows, cols
 
-    def fit(self,l1_ratio=0.1,
-                 positive_only=True,
-                 topK = 100,
+    def fit(self,l1_ratio=0.1, alpha = 1.0, positive_only=True, topK = 100, warm_start = True, tol = 1e-4, max_iter=100,
                  workers=multiprocessing.cpu_count()):
 
         assert l1_ratio>= 0 and l1_ratio<=1, "SLIM_ElasticNet: l1_ratio must be between 0 and 1, provided value was {}".format(l1_ratio)
@@ -211,14 +210,20 @@ class MultiThreadSLIM_ElasticNet(SLIMElasticNetRecommender, BaseItemSimilarityMa
         self.positive_only = positive_only
         self.topK = topK
 
+        warnings.simplefilter("ignore", category = ConvergenceWarning)
+
         self.workers = workers
 
-        self.URM_train = check_matrix(self.URM_train, 'csc', dtype=np.float32)
+        URM_train = check_matrix(self.URM_train, 'csc', dtype=np.float32)
         n_items = self.URM_train.shape[1]
         # fit item's factors in parallel
         
         #oggetto riferito alla funzione nel quale predefinisco parte dell'input
-        _pfit = partial(self._partial_fit, X=self.URM_train, topK=self.topK)
+        _pfit = partial(self._partial_fit, X=URM_train, alpha=alpha,
+                                topK = self.topK,
+                                max_iter=max_iter,
+                                tol=tol,
+                                warm_start = warm_start)
         
         #creo un pool con un certo numero di processi
         pool = Pool(processes=self.workers)

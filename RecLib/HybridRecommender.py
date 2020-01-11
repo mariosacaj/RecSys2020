@@ -23,7 +23,7 @@ class HybridRecommender(BaseRecommender):
             # self.coldBoosted = False
 
     def fit(self, *otherParam):
-            self.warmRecommender.fit(*otherParam)
+        self.warmRecommender.fit(*otherParam)
 
     """
 

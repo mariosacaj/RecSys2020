@@ -1,14 +1,19 @@
 from lightfm import LightFM
 from Base.BaseRecommender import BaseRecommender
 import numpy as np
-
+CYTHON_DTYPE = np.float32
+import scipy.sparse as sp
 
 class LFM(BaseRecommender):
 
     def __init__(self, URM_train, user_features=None, item_features=None, sample_weight=None):
         super(LFM, self).__init__(URM_train, False)
-        self.user_features = user_features
-        self.item_features = item_features
+        self.user_features = sp.identity(self.n_users, dtype=CYTHON_DTYPE, format="csr")
+        self.item_features = sp.identity(self.n_items, dtype=CYTHON_DTYPE, format="csr")
+        if user_features is not None:
+            self.user_features = sp.hstack([self.user_features, user_features], format='csr')
+        if item_features is not None:
+            self.item_features = sp.hstack([self.item_features, item_features], format='csr')
         self.sample_weight = sample_weight
 
     def fit(self, epochs=1, no_components=10,

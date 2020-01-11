@@ -48,7 +48,7 @@ class BaseSimilarityMatrixRecommender(BaseRecommender):
     def save_model(self, folder_path, file_name = None):
 
         if file_name is None:
-            file_name = self.RECOMMENDER_NAME
+            file_name = self.RECOMMENDER_NAME + "_model"
 
         self._print("Saving model in file '{}'".format(folder_path + file_name))
 
