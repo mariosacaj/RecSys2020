@@ -128,7 +128,13 @@ def ICMbuilder(URM, SubclassesMatrix, PriceMatrix, AssetMatrix, ones):
         ICM_all = np.concatenate((ICM_assets.todense(), ICM_prices.todense(), SubclassesMatrix.todense()), axis=1)
     else:
 
-
+        le = preprocessing.KBinsDiscretizer(n_bins=20, encode='ordinal', strategy='kmeans')
+        X = np.reshape(AssetMatrix.data, (-1, 1))
+        le.fit_transform(X)
+        classList = le.transform(X)
+        ones = np.ones(len(classList))
+        ICM_assets = coo_matrix((ones, (AssetMatrix.row, classList.reshape(-1,))), shape=(URM.shape[1], 20))
+        ICM_assets = ICM_assets.tocsr()
 
         le = preprocessing.KBinsDiscretizer(n_bins=19, encode='ordinal', strategy='kmeans')
         # PRICE_9_BINS
